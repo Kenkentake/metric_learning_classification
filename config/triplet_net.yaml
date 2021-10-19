@@ -1,0 +1,5 @@
+TRAIN:
+  MODEL_TYPE: 'triplet_net'
+  MOMENTUM: 0.9
+  NUM_EPOCHS: 100
+  OPTIMIZER_TYPE: 'sgd'
