@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # dataset
-.dataset/
+dataset/
 
 # sh file for docker set up
-.docker/*.sh
+docker/*.sh
