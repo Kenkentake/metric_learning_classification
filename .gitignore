@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# dataset
+.dataset/
+
+# sh file for docker set up
+.docker/*.sh
