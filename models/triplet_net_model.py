@@ -9,7 +9,7 @@ from pytorch_metric_learning.losses import TripletMarginLos
 from pytorch_metric_learning.miners import TripletMarginMiner
 from pytorch_metric_learning.reducers import ThresholdReducer
 
-from utils import save_confusion_matrix
+from utils import save_umap
 
 class TripletNetModel(LightningModule):
     def __init__(self, args, device):
@@ -102,18 +102,28 @@ class TripletNetModel(LightningModule):
         loss = self.triplet_loss(embeddings, labels, triplets) 
         return {
             'count': labels.shape[0],
+            'embeddings': embeddings,
+            'labels': labels,
             'loss': triplet_loss
         }
     
     def test_epoch_end(self, outputs):
+        embeddings_all = []
+        labels_all = []
         count = 0
         triplet_loss = 0.0
+        
         for output in outputs:
             count += output['count']
             triplet_loss += output['loss'].data.item()
+            embeddings_all.append(output['embeddings'])
+            labels_all.append(output['labels'])
 
         training_epoch_outputs = {
             'test_triplet_loss': triplet_loss / count
         }
+        # fig_umap = save_umap(np.concatenate(embeddings_all), np.concatenate(labels_all))
+        
         self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
+
         return None
