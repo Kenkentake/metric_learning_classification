@@ -90,7 +90,7 @@ class TripletNetModel(LightningModule):
             triplet_loss += output['loss'].data.item()
 
         training_epoch_outputs = {
-            'training_triplet_loss': triplet_loss / count
+            'validation_triplet_loss': triplet_loss / count
         }
         self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
         return None
@@ -113,7 +113,7 @@ class TripletNetModel(LightningModule):
             triplet_loss += output['loss'].data.item()
 
         training_epoch_outputs = {
-            'training_triplet_loss': triplet_loss / count
+            'test_triplet_loss': triplet_loss / count
         }
         self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
         return None
