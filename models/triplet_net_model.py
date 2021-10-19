@@ -41,7 +41,11 @@ class TripletNetModel(LightningModule):
         return x
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
+        if self.args.TRAIN.OPTIMIZER_TYPE == 'sgd':
+            optimizer = optim.SGD(self.parameters(), lr=self.learning_rate, 
+                                  momentum=self.args.TRAIN.MOMUNTUM)
+        if self.args.TRAIN.OPTIMIZER_TYPE == 'adam':
+            optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
         return [optimizer], [scheduler]
 
