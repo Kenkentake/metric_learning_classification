@@ -133,4 +133,4 @@ dataset/
 
 # sh file
 docker/*.sh
-run_train.py
+run_train.sh
