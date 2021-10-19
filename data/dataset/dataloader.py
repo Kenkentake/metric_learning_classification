@@ -12,6 +12,11 @@ def set_dataloader(args, phase):
     transform = set_transforms(args.DATA.TRANSFORM_LIST, args.DATA.IMG_SIZE)
 
     dataset = CIFAR10Dataset(phase, root_path, transform).dataset
+
+    if phase == 'test':
+        shuffle = False
+    else:
+        shuffle = True
     dataloader = DataLoader(dataset, batch_size=batchsize,
-                            num_workers=num_workers, sampler=None, shuffle=True)
+                            num_workers=num_workers, sampler=None, shuffle=shuffle)
     return dataloader
