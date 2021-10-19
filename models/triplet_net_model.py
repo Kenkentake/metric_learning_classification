@@ -72,6 +72,29 @@ class TripletNetModel(LightningModule):
         self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
         return None
 
+    def validation_step(self, batch, batch_idx):
+        inputs, labels = batch
+        embeddings = self(inputs)
+        triplets = self.miner(embeddings, labels)
+        loss = self.triplet_loss(embeddings, labels, triplets) 
+        return {
+            'count': labels.shape[0],
+            'loss': triplet_loss
+        }
+    
+    def validation_epoch_end(self, outputs):
+        count = 0
+        triplet_loss = 0.0
+        for output in outputs:
+            count += output['count']
+            triplet_loss += output['loss'].data.item()
+
+        training_epoch_outputs = {
+            'training_triplet_loss': triplet_loss / count
+        }
+        self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
+        return None
+
     def test_step(self, batch, batch_idx):
         inputs, labels = batch
         embeddings = self(inputs)
