@@ -136,5 +136,5 @@ docker/*.sh
 run_train.sh
 
 # ml outputs
-./weights
-./lightning-log
+weights/
+lightning-log/
