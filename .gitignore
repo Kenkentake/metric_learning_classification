@@ -137,4 +137,4 @@ run_train.sh
 
 # ml outputs
 weights/
-lightning-log/
+lightning_log/
