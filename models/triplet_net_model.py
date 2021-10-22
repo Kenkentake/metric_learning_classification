@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -116,14 +117,14 @@ class TripletNetModel(LightningModule):
         for output in outputs:
             count += output['count']
             triplet_loss += output['loss'].data.item()
-            embeddings_all.append(output['embeddings'])
-            labels_all.append(output['labels'])
+            embeddings_all.append(output['embeddings'].cpu())
+            labels_all.append(output['labels'].cpu())
 
         training_epoch_outputs = {
             'test_triplet_loss': triplet_loss / count
         }
-        # fig_umap = save_umap(np.concatenate(embeddings_all), np.concatenate(labels_all))
-        
+        fig_umap = save_umap(np.concatenate(embeddings_all), np.concatenate(labels_all), self.args.TRAIN.SEED)
+        self.logger.experiment.add_figure("Triplet UMAP", fig_umap)
         self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
 
         return None
