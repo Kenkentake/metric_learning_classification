@@ -9,8 +9,8 @@ class CIFAR10Dataset:
         self.prepare(phase, root_path, train_size_rate, transform)
 
     def prepare(self, phase, root_path, train_size_rate, transform):
-        train_val_dataset = CIFAR10(download=True, root_path, train=True, transform=transform)
-        test_dataset = CIFAR10(download=True, root_path, train=False, transform=transform)
+        train_val_dataset = CIFAR10(download=True, root=root_path, train=True, transform=transform)
+        test_dataset = CIFAR10(download=True, root=root_path, train=False, transform=transform)
         # split to train and validation
         train_size = int(len(train_val_dataset) * train_size_rate)
         val_size = len(train_val_dataset) - train_size
@@ -23,6 +23,6 @@ class CIFAR10Dataset:
             self.dataset = train_dataset
         elif phase == 'val':
             self.dataset = val_dataset
-        else phase == 'test'
+        else: 
             self.dataset = test_dataset
         return None

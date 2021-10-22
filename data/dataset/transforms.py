@@ -4,7 +4,6 @@ import torchvision.transforms as transforms
 
 def set_transforms(transforms_list, img_size):
     compose_list = []
-    f
     for t in transforms_list:
         if t == 'normalize':
             compose_list.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))

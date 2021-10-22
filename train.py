@@ -7,7 +7,7 @@ import torch
 from config import update_args, parse_arguments
 from data.dataset import set_dataloader
 from models.select_model import select_model
-from pytorch_lightning.loggers import TensorBoardLoadder
+from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 
@@ -43,6 +43,7 @@ def main(args):
     trainer.fit(model, train_dataloader, val_dataloader)
     trainer.test(ckpt_path=None, test_dataloaders=test_dataloader)
 
+    os.makedirs('./weights', exist_ok=True)
     save_path = f'./weights/{args.TRAIN.RUN_NAME}.ckpt'
     torch.save(model.state_dict(), save_path)
 

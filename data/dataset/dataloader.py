@@ -9,14 +9,15 @@ def set_dataloader(args, phase):
     batch_size = args.TRAIN.BATCH_SIZE
     num_workers = args.DATA.NUM_WORKERS
     root_path = args.DATA.ROOT_PATH
+    train_size_rate = args.DATA.TRAIN_SIZE_RATE
     transform = set_transforms(args.DATA.TRANSFORM_LIST, args.DATA.IMG_SIZE)
 
-    dataset = CIFAR10Dataset(phase, root_path, transform).dataset
+    dataset = CIFAR10Dataset(phase, root_path, train_size_rate, transform).dataset
 
-    if phase == 'test':
-        shuffle = False
-    else:
+    if phase == 'train':
         shuffle = True
-    dataloader = DataLoader(dataset, batch_size=batchsize,
+    else:
+        shuffle = False
+    dataloader = DataLoader(dataset, batch_size=batch_size,
                             num_workers=num_workers, sampler=None, shuffle=shuffle)
     return dataloader

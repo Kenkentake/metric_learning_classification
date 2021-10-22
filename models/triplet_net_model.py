@@ -4,8 +4,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from pytorch_lightning import LightningModule
-from pytorch_metric_learning.distances import CosineSimilarit
-from pytorch_metric_learning.losses import TripletMarginLos
+from pytorch_metric_learning.distances import CosineSimilarity
+from pytorch_metric_learning.losses import TripletMarginLoss
 from pytorch_metric_learning.miners import TripletMarginMiner
 from pytorch_metric_learning.reducers import ThresholdReducer
 
@@ -18,18 +18,18 @@ class TripletNetModel(LightningModule):
         self.new_device = device
         self.learning_rate = args.TRAIN.LEARNING_RATE
 
-        self.distance = Cosineimilarity()
+        self.distance = CosineSimilarity()
         # reducer: receive all losses for each pair and calculate the final loss
         self.reducer = ThresholdReducer(low = 0)
-        self.triplet_loss = TripletMarginLoss(margin=0.2, distance=distance, reducer=reducer)
+        self.triplet_loss = TripletMarginLoss(margin=0.2, distance=self.distance, reducer=self.reducer)
         # miner: make pairs of triplet
-        self.miner = TripletMarginMiner(margin=0.2, distance=distance)
+        self.miner = TripletMarginMiner(margin=0.2, distance=self.distance)
         self.cross_entropy_loss = nn.CrossEntropyLoss
 
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Conv2d(6, 16, 5)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
 
     def forward(self, x):
@@ -43,7 +43,7 @@ class TripletNetModel(LightningModule):
     def configure_optimizers(self):
         if self.args.TRAIN.OPTIMIZER_TYPE == 'sgd':
             optimizer = optim.SGD(self.parameters(), lr=self.learning_rate, 
-                                  momentum=self.args.TRAIN.MOMUNTUM)
+                                  momentum=self.args.TRAIN.MOMENTUM)
         if self.args.TRAIN.OPTIMIZER_TYPE == 'adam':
             optimizer = optim.Adam(self.parameters(), lr=self.learning_rate)
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
@@ -56,7 +56,7 @@ class TripletNetModel(LightningModule):
         loss = self.triplet_loss(embeddings, labels, triplets) 
         return {
             'count': labels.shape[0],
-            'loss': triplet_loss
+            'loss': loss
         }
     
     def training_epoch_end(self, outputs):
@@ -79,7 +79,7 @@ class TripletNetModel(LightningModule):
         loss = self.triplet_loss(embeddings, labels, triplets) 
         return {
             'count': labels.shape[0],
-            'loss': triplet_loss
+            'loss': loss
         }
     
     def validation_epoch_end(self, outputs):
@@ -104,7 +104,7 @@ class TripletNetModel(LightningModule):
             'count': labels.shape[0],
             'embeddings': embeddings,
             'labels': labels,
-            'loss': triplet_loss
+            'loss': loss
         }
     
     def test_epoch_end(self, outputs):
