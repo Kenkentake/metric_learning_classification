@@ -16,7 +16,7 @@ class TripletNetModel(LightningModule):
     def __init__(self, args, device):
         super(TripletNetModel, self).__init__()
         self.args = args
-        self.new_device = device
+        self.__device = device
         self.learning_rate = args.TRAIN.LEARNING_RATE
 
         self.distance = CosineSimilarity()
