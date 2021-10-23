@@ -7,6 +7,8 @@ def set_transforms(transforms_list, img_size):
     for t in transforms_list:
         if t == 'normalize':
             compose_list.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+        if t == 'horizontal_flip':
+            compose_list.append(transforms.RandomHorizontalFlip(0.3))
         if t == 'resize':
             compose_list.append(transforms.Resize(img_size))
         if t == 'to_tensor':
