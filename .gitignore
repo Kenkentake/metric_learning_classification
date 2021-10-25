@@ -133,7 +133,7 @@ dataset/
 
 # sh file
 docker/*.sh
-run_train.sh
+./*.sh
 
 # ml outputs
 weights/
