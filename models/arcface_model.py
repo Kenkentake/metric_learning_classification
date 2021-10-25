@@ -45,15 +45,23 @@ class ArcfaceModel(LightningModule):
                             nn.MaxPool2d(2, 2),
                             nn.Dropout(0.3)) 
 
-        self.weight = nn.Parameter(torch.FloatTensor(128, 1024))
+        self.fc1 = nn.Linear(256 * 2 * 2, 128)
+        self.relu = nn.ReLU(inplace=True)
+        self.fc2 = nn.Linear(128, 10)
+        
+        self.weight = nn.Parameter(torch.FloatTensor(10, 10))
         nn.init.xavier_uniform_(self.weight)
     
     def forward(self, x, label):
         cnn_output = self.feature_extractor_cnn(x)
         fcl_input = cnn_output.view(-1, 256 * 2 * 2)
+        embeddings = self.fc1(fcl_input)
+        x = self.relu(embeddings)
+        x = self.fc2(x)
+        
         # arcface part
         # l2 normalize x and W
-        cos = F.linear(F.normalize(fcl_input), F.normalize(self.weight))
+        cos = F.linear(F.normalize(x), F.normalize(self.weight))
         # angular margin penalty
         sin = torch.sqrt((1.0 - torch.pow(cos, 2)).clamp(0, 1))
         # phi: cos(theta + m)
@@ -66,7 +74,7 @@ class ArcfaceModel(LightningModule):
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
         output = (one_hot * phi) + ((1.0 - one_hot) * cos)
         output *= self.scale_factor
-        return output
+        return embeddings, output
 
     def configure_optimizers(self):
         if self.args.TRAIN.OPTIMIZER_TYPE == 'sgd':
@@ -79,7 +87,7 @@ class ArcfaceModel(LightningModule):
 
     def training_step(self, batch, batch_idx):
         inputs, labels = batch
-        outputs = self(inputs, labels)
+        _, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
         return {
             'count': labels.shape[0],
@@ -101,7 +109,7 @@ class ArcfaceModel(LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inputs, labels = batch
-        outputs = self(inputs, labels)
+        _, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
         return {
             'count': labels.shape[0],
@@ -123,7 +131,7 @@ class ArcfaceModel(LightningModule):
 
     def test_step(self, batch, batch_idx):
         inputs, labels = batch
-        outputs = self(inputs, labels)
+        embeddings, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
         return {
             'count': labels.shape[0],
