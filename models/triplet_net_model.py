@@ -41,7 +41,7 @@ class TripletNetModel(LightningModule):
                             nn.MaxPool2d(2, 2),
                             nn.Dropout(0.3)) 
 
-        self.feature_extractor_fcl = nn.Linear(256 * 2 * 2, 256)
+        self.feature_extractor_fcl = nn.Linear(256 * 2 * 2, 128)
 
     def forward(self, x):
         cnn_output = self.feature_extractor_cnn(x)

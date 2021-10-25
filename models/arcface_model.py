@@ -45,7 +45,7 @@ class ArcfaceModel(LightningModule):
                             nn.MaxPool2d(2, 2),
                             nn.Dropout(0.3)) 
 
-        self.weight = nn.Parameter(torch.FloatTensor(254, 1024))
+        self.weight = nn.Parameter(torch.FloatTensor(128, 1024))
         nn.init.xavier_uniform_(self.weight)
     
     def forward(self, x, label):
