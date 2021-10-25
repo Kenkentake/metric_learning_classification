@@ -10,6 +10,7 @@ from pytorch_metric_learning.losses import TripletMarginLoss
 from pytorch_metric_learning.miners import TripletMarginMiner
 from pytorch_metric_learning.reducers import ThresholdReducer
 
+from models.utils_model import ConvBatchNormRelu
 from utils import save_umap
 
 class TripletNetModel(LightningModule):
@@ -135,17 +136,3 @@ class TripletNetModel(LightningModule):
         self.logger.log_metrics(test_epoch_outputs, step=self.current_epoch)
 
         return None
-
-
-class ConvBatchNormRelu(LightningModule):
-    def __init__(self, input_channel, kernel_size, output_channel, padding):
-        super(ConvBatchNormRelu, self).__init__()
-        self.conv = nn.Conv2d(input_channel, output_channel, kernel_size, padding=padding)
-        self.batchnorm = nn.BatchNorm2d(output_channel)
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.batchnorm(x)
-        x = self.relu(x)
-        return x

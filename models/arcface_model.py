@@ -7,6 +7,7 @@ import torch.optim as optim
 
 from pytorch_lightning import LightningModule
 
+from models.utils_model import ConvBatchNormRelu
 from utils import save_umap
 
 class ArcfaceModel(LightningModule):
@@ -32,12 +33,6 @@ class ArcfaceModel(LightningModule):
         self.mm = math.sin(math.pi - self.margin) * self.margin
         self.cross_entropy_loss = nn.CrossEntropyLoss()
 
-        # self.conv1 = nn.Conv2d(3, 6, 5)
-        # self.pool = nn.MaxPool2d(2, 2)
-        # self.conv2 = nn.Conv2d(6, 16, 5)
-        # self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        # self.fc2 = nn.Linear(120, 84)
-
         self.feature_extractor_cnn = nn.Sequential(
                             ConvBatchNormRelu(3, 3, 32, 1),
                             nn.MaxPool2d(2, 2),
@@ -56,12 +51,6 @@ class ArcfaceModel(LightningModule):
     def forward(self, x, label):
         cnn_output = self.feature_extractor_cnn(x)
         fcl_input = cnn_output.view(-1, 256 * 2 * 2)
-        # x = self.pool(F.relu(self.conv1(x)))
-        # x = self.pool(F.relu(self.conv2(x)))
-        # x = x.view(-1, 16 * 5 * 5)
-        # x = F.relu(self.fc1(x))
-        # x = self.fc2(x)
-
         # arcface part
         # l2 normalize x and W
         cos = F.linear(F.normalize(fcl_input), F.normalize(self.weight))
@@ -163,17 +152,3 @@ class ArcfaceModel(LightningModule):
         self.logger.log_metrics(test_epoch_outputs, step=self.current_epoch)
 
         return None
-    
-
-class ConvBatchNormRelu(LightningModule):
-    def __init__(self, input_channel, kernel_size, output_channel, padding):
-        super(ConvBatchNormRelu, self).__init__()
-        self.conv = nn.Conv2d(input_channel, output_channel, kernel_size, padding=padding)
-        self.batchnorm = nn.BatchNorm2d(output_channel)
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.batchnorm(x)
-        x = self.relu(x)
-        return x
