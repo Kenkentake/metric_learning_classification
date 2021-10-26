@@ -17,8 +17,10 @@ _C.TRAIN.OPTIMIZER_TYPE = ''
 _C.TRAIN.RUN_NAME = ''
 _C.TRAIN.SCALE_FACTOR = 30.0
 _C.TRAIN.SEED = 42
+_C.TRAIN.WEIGHT_PATH = ''
 
 _C.DATA = CfgNode()
+_C.DATA.CLASS_LIST = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 _C.DATA.IMG_SIZE = (32, 32)
 _C.DATA.ROOT_PATH = './dataset'
 _C.DATA.TRANSFORM_LIST = ['resize', 'horizontal_flip', 'to_tensor']
