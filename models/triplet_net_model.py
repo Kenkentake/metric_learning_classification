@@ -26,7 +26,7 @@ class TripletNetModel(LightningModule):
         self.reducer = ThresholdReducer(low = 0)
         self.triplet_loss = TripletMarginLoss(margin=self.margin, distance=self.distance, reducer=self.reducer)
         # miner: make pairs of triplet
-        self.miner = TripletMarginMiner(margin=self.margin, distance=self.distance)
+        self.miner = TripletMarginMiner(margin=self.margin, distance=self.distance, type_of_triplets='semihard')
         self.cross_entropy_loss = nn.CrossEntropyLoss
 
         self.feature_extractor_cnn = nn.Sequential(
