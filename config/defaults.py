@@ -5,6 +5,7 @@ _C = CfgNode()
 
 # Train Params
 _C.TRAIN = CfgNode()
+_C.TRAIN.ADD_KNN = True
 _C.TRAIN.BATCH_SIZE = 256
 _C.TRAIN.EASY_MARGIN = True
 _C.TRAIN.LEARNING_RATE = 1e-4

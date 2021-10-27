@@ -40,7 +40,6 @@ class TripletNetModel(LightningModule):
                             ConvBatchNormRelu(128, 3, 256, 1),
                             nn.MaxPool2d(2, 2),
                             nn.Dropout(0.3)) 
-
         self.feature_extractor_fcl = nn.Linear(256 * 2 * 2, 128)
 
     def forward(self, x):
@@ -117,9 +116,9 @@ class TripletNetModel(LightningModule):
         }
     
     def test_epoch_end(self, outputs):
+        count = 0
         embeddings_all = []
         labels_all = []
-        count = 0
         triplet_loss = 0.0
         
         for output in outputs:

@@ -4,11 +4,12 @@ import pytorch_lightning as pl
 import random
 import torch
 
+from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
+
 from config import update_args, parse_arguments
 from data.dataset import set_dataloader
 from models.select_model import select_model
-from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 def fix_seed(seed):
