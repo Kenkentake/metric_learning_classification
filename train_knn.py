@@ -55,12 +55,14 @@ def main(args):
         
     train_x = np.concatenate(train_embeddings)
     train_y = np.concatenate(train_labels)
-    test_x = np.concatenate(train_embeddings)
-    test_y = np.concatenate(train_labels)
+    test_x = np.concatenate(test_embeddings)
+    test_y = np.concatenate(test_labels)
 
     knn_clf = KNeighborsClassifier()
     knn_clf.fit(train_x, train_y)
     pred_y = knn_clf.predict(test_x)
+    print(f'test_y shape is {test_y.shape}')
+    print(f'pred_y shape is {pred_y.shape}')
 
     fig_conf_matrix = save_confusion_matrix(test_y, pred_y)
     log_path = f'./lightning_log/{args.TRAIN.RUN_NAME}/'
