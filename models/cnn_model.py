@@ -8,7 +8,7 @@ import torch.optim as optim
 from pytorch_lightning import LightningModule
 
 from models.utils_model import ConvBatchNormRelu
-from utils import save_umap
+from utils import save_confusion_matrix, save_umap
 
 class CNNModel(LightningModule):
     def __init__(self, args, device):
@@ -58,19 +58,23 @@ class CNNModel(LightningModule):
         inputs, labels = batch
         _, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
+        accuracy = (outputs.argmax(1) == labels).sum().item()
         return {
+            'accuracy': accuracy,
             'count': labels.shape[0],
             'loss': loss
         }
     
     def training_epoch_end(self, outputs):
+        accuracy = cross_entropy_loss = 0.0
         count = 0
-        cross_entropy_loss = 0.0
         for output in outputs:
+            accuracy += output['accuracy']
             count += output['count']
             cross_entropy_loss += output['loss'].data.item()
 
         training_epoch_outputs = {
+            'training_accuracy': accuracy / count,
             'training_cross_entropy_loss': cross_entropy_loss / count
         }
         self.logger.log_metrics(training_epoch_outputs, step=self.current_epoch)
@@ -80,19 +84,23 @@ class CNNModel(LightningModule):
         inputs, labels = batch
         _, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
+        accuracy = (outputs.argmax(1) == labels).sum().item()
         return {
+            'accuracy': accuracy,
             'count': labels.shape[0],
             'loss': loss
         }
     
     def validation_epoch_end(self, outputs):
+        accuracy = cross_entropy_loss = 0.0
         count = 0
-        cross_entropy_loss = 0.0
         for output in outputs:
+            accuracy += output['accuracy']
             count += output['count']
             cross_entropy_loss += output['loss'].data.item()
 
         validation_epoch_outputs = {
+            'validation_accuracy': accuracy / count,
             'validation_cross_entropy_loss': cross_entropy_loss / count
         }
         self.logger.log_metrics(validation_epoch_outputs, step=self.current_epoch)
@@ -102,7 +110,10 @@ class CNNModel(LightningModule):
         inputs, labels = batch
         embeddings, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
+        accuracy = (outputs.argmax(1) == labels).sum().item()
         return {
+            'preds': outputs.argmax(1),
+            'accuracy': accuracy,
             'count': labels.shape[0],
             'embeddings': outputs,
             'labels': labels,
@@ -112,16 +123,27 @@ class CNNModel(LightningModule):
     def test_epoch_end(self, outputs):
         embeddings_all = []
         labels_all = []
+        preds_all = []
+        labels_conf_matrix = []
+        preds_conf_matrix = []
+        accuracy = cross_entropy_loss = 0.0
         count = 0
-        cross_entropy_loss = 0.0
         
         for output in outputs:
+            preds_conf_matrix.extend(output['preds'].tolist())
+            labels_conf_matrix.extend(output['labels'].tolist())
+            accuracy += output['accuracy']
             count += output['count']
             cross_entropy_loss += output['loss'].data.item()
             embeddings_all.append(output['embeddings'].cpu())
             labels_all.append(output['labels'].cpu())
+            preds_all.append(output['preds'].cpu())
+
+        fig_conf_matrix = save_confusion_matrix(labels_conf_matrix, preds_conf_matrix)
+        self.logger.experiment.add_figure("cnn Confusion Matrix", fig_conf_matrix)
 
         test_epoch_outputs = {
+            'test_accuracy': accuracy / count,
             'test_cross_entropy_loss': cross_entropy_loss / count
         }
         fig_umap = save_umap(np.concatenate(embeddings_all), np.concatenate(labels_all), self.args.TRAIN.SEED)

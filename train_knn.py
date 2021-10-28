@@ -59,7 +59,7 @@ def main(args):
     log_path = f'./lightning_log/{args.TRAIN.RUN_NAME}/'
     os.makedirs(log_path, exist_ok=True)
     writer = SummaryWriter(log_dir=log_path)
-    writer.add_figure('confusion_matrix', fig_conf_matrix)
+    writer.add_figure(f'{args.TRAIN.RUN_NAME} Confusion Matrix', fig_conf_matrix)
     writer.close()
 
 
