@@ -1,0 +1,6 @@
+TRAIN:
+  MODEL_TYPE: 'cnn'
+  MOMENTUM: 0.9
+  NUM_EPOCHS: 1
+  OPTIMIZER_TYPE: 'adam'
+  RUN_NAME: 'cnn'

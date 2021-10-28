@@ -1,11 +1,13 @@
-from models.triplet_net_model import TripletNetModel
 from models.arcface_model import ArcfaceModel
+from models.cnn_model import CNNModel
+from models.triplet_net_model import TripletNetModel
 
 def select_model(args, device):
     model_type = args.TRAIN.MODEL_TYPE
     model_dict = {
-            "triplet_net": TripletNetModel,
             "arcface": ArcfaceModel,
+            "cnn": CNNModel,
+            "triplet_net": TripletNetModel,
             }
     
     if model_type not in model_dict:
