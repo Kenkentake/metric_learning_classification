@@ -28,6 +28,7 @@ def main(args):
     val_dataloader = set_dataloader(args, phase='val')
     test_dataloader = set_dataloader(args, phase='test')
 
+    model_name = args.TRAIN.MODEL_TYPE
     model = select_model(args, device)
     model.load_state_dict(torch.load(args.TRAIN.WEIGHT_PATH))
 
@@ -37,12 +38,18 @@ def main(args):
     test_labels = []
 
     for (inputs, labels) in train_dataloader:
-        embeddings = model(inputs)
+        if model_name == 'triplet_net':
+            embeddings = model(inputs)
+        else:
+            embeddings, _ = model(inputs)
         train_embeddings.append(embeddings.to('cpu').detach().numpy())
         train_labels.append(labels.to('cpu').detach().numpy())
 
     for (inputs, labels) in test_dataloader:
-        embeddings = model(inputs)
+        if model_name == 'triplet_net':
+            embeddings = model(inputs)
+        else:
+            embeddings, _ = model(inputs)
         test_embeddings.append(embeddings.to('cpu').detach().numpy())
         test_labels.append(labels.to('cpu').detach().numpy())
         

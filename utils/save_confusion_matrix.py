@@ -13,7 +13,7 @@ def save_confusion_matrix(labels, preds):
     conf_matrix = confusion_matrix(labels, preds, labels=label_name, normalize='true')
     # plot and save
     fig_conf_matrix = plt.figure()
-    plt.imshow(conf_matrix, cmap=plt.cm.Blues)
+    plt.imshow(conf_matrix, cmap=plt.cm.Blues, vmin=0, vmax=1)
     plt.colorbar()
     tick_marks = np.arange(len(label_name))
     plt.xticks(tick_marks, label_name, rotation=45)
