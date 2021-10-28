@@ -21,16 +21,13 @@ def fix_seed(seed):
 def main(args):
     device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 
-    if args.TRAIN.MODEL_TYPE == 'arcface' or 'triplet_net':
-        checkpoint_callback = ModelCheckpoint(monitor='validation_loss', mode='min')
+    checkpoint_callback = ModelCheckpoint(monitor='validation_loss', mode='min')
 
     train_dataloader = set_dataloader(args, phase='train')
     val_dataloader = set_dataloader(args, phase='val')
     test_dataloader = set_dataloader(args, phase='test')
 
     model = select_model(args, device)
-    # if len(args.TRAIN.LOAD_WEIGHT_PATH) != 0:
-    #     model.load_state_dict(torch.load(args.TRAIN.LOAD_WEIGHT_PATH))
 
     tb_logger = TensorBoardLogger(save_dir=os.getcwd(), name='lightning_log')
 
