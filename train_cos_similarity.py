@@ -63,19 +63,12 @@ def main(args):
     get_preds = np.vectorize(lambda x: train_y[x], otypes=[np.ndarray])
     pred_y = get_preds(most_similarity_indices)
 
-    print(f'test_y shape is {test_y.shape}')
-    print(f'pred_y shape is {pred_y.shape}')
-    print(type(pred_y[0]))
-    print(np.unique(test_y))
-    print(np.unique(pred_y))
-    print(pred_y)
-    print(test_y)
-
-    fig_conf_matrix = save_confusion_matrix(test_y.tolist(), pred_y.tolist())
+    fig_conf_matrix, accuracy = save_confusion_matrix(test_y.tolist(), pred_y.tolist())
     log_path = f'./lightning_log/{args.TRAIN.RUN_NAME}/'
     os.makedirs(log_path, exist_ok=True)
     writer = SummaryWriter(log_dir=log_path)
     writer.add_figure(f'{args.TRAIN.RUN_NAME} Confusion Matrix', fig_conf_matrix)
+    writer.add_scalar('Average Accuracy', accuracy)
     writer.close()
 
 

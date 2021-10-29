@@ -1,7 +1,8 @@
 TRAIN:
   MODEL_TYPE: 'arcface'
+  OUTPUT_DIM: 8
   RUN_NAME:
-  WEIGHT_PATH: 'weights/arcface_after_update.ckpt'
+  WEIGHT_PATH: 'weights/8_class/arcface_8class.ckpt'
 
 DATA:
   CLASS_LIST: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
