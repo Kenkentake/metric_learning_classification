@@ -11,6 +11,9 @@ def save_confusion_matrix(labels, preds):
     # label_name=['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     label_name = list(range(10))
     conf_matrix = confusion_matrix(labels, preds, labels=label_name, normalize='true')
+    # calc accuracy
+    accuracy = np.trace(conf_matrix) / np.sum(conf_matrix)
+
     # plot and save
     fig_conf_matrix = plt.figure()
     plt.imshow(conf_matrix, cmap=plt.cm.Blues, vmin=0, vmax=1)
@@ -29,4 +32,4 @@ def save_confusion_matrix(labels, preds):
     plt.xlabel('Pred Label')
     plt.ylabel('Ground Truth')
 
-    return fig_conf_matrix
+    return fig_conf_matrix, accuracy

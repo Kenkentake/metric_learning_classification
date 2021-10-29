@@ -13,8 +13,6 @@ from utils import save_confusion_matrix, save_umap
 class ArcfaceModel(LightningModule):
     """
     Args:
-        in_features: number of dimensions of feature vector
-        out_features: number of class
         s: scale factor (= 1 / temperature for softmax)
         m: margin (radian)
         easy_margin: dealing with margin problem (when theta > pi - m)
@@ -23,6 +21,7 @@ class ArcfaceModel(LightningModule):
         super(ArcfaceModel, self).__init__()
         self.args = args
         self._device = device
+        self.output_dim = args.TRAIN.OUTPUT_DIM
         self.learning_rate = args.TRAIN.LEARNING_RATE
         self.scale_factor = self.args.TRAIN.SCALE_FACTOR
         self.margin = self.args.TRAIN.MARGIN
@@ -47,9 +46,12 @@ class ArcfaceModel(LightningModule):
 
         self.fc1 = nn.Linear(256 * 2 * 2, 128)
         self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(128, 10)
-        
-        self.weight = nn.Parameter(torch.FloatTensor(10, 10))
+        if self.output_dim == 10:
+            self.fc2 = nn.Linear(128, 10)
+            self.weight = nn.Parameter(torch.FloatTensor(10, 10))
+        elif self.output_dim == 8:
+            self.fc2 = nn.Linear(128, 8)
+            self.weight = nn.Parameter(torch.FloatTensor(8, 8))
         nn.init.xavier_uniform_(self.weight)
     
     def forward(self, x, label=None):
@@ -117,7 +119,7 @@ class ArcfaceModel(LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inputs, labels = batch
-        _, outputs = self(inputs)
+        _, outputs = self(inputs, labels)
         loss = self.cross_entropy_loss(outputs, labels) 
         accuracy = (outputs.argmax(1) == labels).sum().item()
         return {
@@ -144,45 +146,57 @@ class ArcfaceModel(LightningModule):
     def test_step(self, batch, batch_idx):
         inputs, labels = batch
         embeddings, outputs = self(inputs)
-        loss = self.cross_entropy_loss(outputs, labels) 
-        accuracy = (outputs.argmax(1) == labels).sum().item()
-        return {
-            'preds': outputs.argmax(1),
-            'accuracy': accuracy,
-            'count': labels.shape[0],
-            'embeddings': outputs,
-            'labels': labels,
-            'loss': loss
-        }
+        if self.output_dim == 10:
+            loss = self.cross_entropy_loss(outputs, labels) 
+            accuracy = (outputs.argmax(1) == labels).sum().item()
+            return {
+                'preds': outputs.argmax(1),
+                'accuracy': accuracy,
+                'count': labels.shape[0],
+                'embeddings': outputs,
+                'labels': labels,
+                'loss': loss
+            }
+        elif self.output_dim == 8:
+            return {
+                'embeddings': outputs,
+                'labels': labels,
+            }
     
     def test_epoch_end(self, outputs):
         embeddings_all = []
         labels_all = []
-        preds_all = []
-        labels_conf_matrix = []
-        preds_conf_matrix = []
-        accuracy = cross_entropy_loss = 0.0
-        count = 0
-        
-        for output in outputs:
-            preds_conf_matrix.extend(output['preds'].tolist())
-            labels_conf_matrix.extend(output['labels'].tolist())
-            accuracy += output['accuracy']
-            count += output['count']
-            cross_entropy_loss += output['loss'].data.item()
-            embeddings_all.append(output['embeddings'].cpu())
-            labels_all.append(output['labels'].cpu())
-            preds_all.append(output['preds'].cpu())
+            
+        if self.output_dim == 10:
+            preds_all = []
+            labels_conf_matrix = []
+            preds_conf_matrix = []
+            accuracy = cross_entropy_loss = 0.0
+            count = 0
+            for output in outputs:
+                preds_conf_matrix.extend(output['preds'].tolist())
+                labels_conf_matrix.extend(output['labels'].tolist())
+                accuracy += output['accuracy']
+                count += output['count']
+                cross_entropy_loss += output['loss'].data.item()
+                embeddings_all.append(output['embeddings'].cpu())
+                labels_all.append(output['labels'].cpu())
+                preds_all.append(output['preds'].cpu())
+            fig_conf_matrix, _ = save_confusion_matrix(labels_conf_matrix, preds_conf_matrix)
+            self.logger.experiment.add_figure("Arcface Confusion Matrix", fig_conf_matrix)
+            fig_umap = save_umap(np.concatenate(embeddings_all), np.concatenate(labels_all), self.args.TRAIN.SEED)
+            self.logger.experiment.add_figure("Arcface UMAP", fig_umap)
+            test_epoch_outputs = {
+                'test_accuracy': accuracy / count,
+                'test_cross_entropy_loss': cross_entropy_loss / count
+            }
+            self.logger.log_metrics(test_epoch_outputs, step=self.current_epoch)
 
-        fig_conf_matrix = save_confusion_matrix(labels_conf_matrix, preds_conf_matrix)
-        self.logger.experiment.add_figure("arcface Confusion Matrix", fig_conf_matrix)
+        elif self.output_dim == 8:
+            for output in outputs:
+                embeddings_all.append(output['embeddings'].cpu())
+                labels_all.append(output['labels'].cpu())
 
-        test_epoch_outputs = {
-            'test_accuracy': accuracy / count,
-            'test_cross_entropy_loss': cross_entropy_loss / count
-        }
         fig_umap = save_umap(np.concatenate(embeddings_all), np.concatenate(labels_all), self.args.TRAIN.SEED)
         self.logger.experiment.add_figure("Arcface UMAP", fig_umap)
-        self.logger.log_metrics(test_epoch_outputs, step=self.current_epoch)
-
         return None

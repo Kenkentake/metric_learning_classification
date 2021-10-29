@@ -61,14 +61,13 @@ def main(args):
     knn_clf = KNeighborsClassifier()
     knn_clf.fit(train_x, train_y)
     pred_y = knn_clf.predict(test_x)
-    print(f'test_y shape is {test_y.shape}')
-    print(f'pred_y shape is {pred_y.shape}')
-
-    fig_conf_matrix = save_confusion_matrix(test_y, pred_y)
+    
+    fig_conf_matrix, accuracy = save_confusion_matrix(test_y, pred_y)
     log_path = f'./lightning_log/{args.TRAIN.RUN_NAME}/'
     os.makedirs(log_path, exist_ok=True)
     writer = SummaryWriter(log_dir=log_path)
     writer.add_figure(f'{args.TRAIN.RUN_NAME} Confusion Matrix', fig_conf_matrix)
+    writer.add_scalar('Average Accuracy', accuracy)
     writer.close()
 
 
