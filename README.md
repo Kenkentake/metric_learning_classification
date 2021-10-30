@@ -58,4 +58,5 @@ You can check the learning curve, the 2D visualization of embedding space and co
 ```
 $ tensorboard --host 0.0.0.0 --logdir ./lightning_log --port {local_port}
 ```
+<img width="600" alt="スクリーンショット 2021-10-30 9 26 21" src="https://user-images.githubusercontent.com/40286449/139513654-045cd323-be0c-4598-bbc6-8a004464cb71.png">
 
