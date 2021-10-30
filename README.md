@@ -35,7 +35,7 @@ $ python train.py --cfg_file './config/arcface.yaml' --run_name 'arcface' --seed
 ```
 ## How to Train classifier
 And then you can train k-Nearest Neighbor or cosine similarity classifier using the model trained above as the feature extractor. <br>
-Firstly, specify the path of the weight file you saved in `config/knn.yaml`
+Firstly, specify the path of the weight file you saved in `config/knn.yaml` or `config/cos_similarity.yaml`
 #### triplet loss + kNN
 ```
 $ python train_knn.py --cfg_file './config/knn.yaml' --run_name 'triplet_knn' --seed 42
